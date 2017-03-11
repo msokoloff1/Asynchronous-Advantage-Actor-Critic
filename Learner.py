@@ -3,24 +3,41 @@ import time
 
 class Learner():
     def __init__(self, globalQueue, primaryNetwork, actionSpace):
-        super().__init__()
+        """
+        - Uses shared memory to perform batch training across asynchronous games being played
+
+        globalQueue    : Shared memory that all Player objects write to. Contains the agents memory for learning.
+        primaryNetwork : Network that the learner will update.
+        actionSpace    : Integer representing the number of discrete actions the agent can take 
+        """
+
         self.globalQueue = globalQueue
-        #self.setDaemon(True)
         self.killed = False
         self.net = primaryNetwork
         self.numUpdated = 0
         self.actionSpace = actionSpace
         
+    def run(self, saver,sess, modelSavePath):
+        """
+        -Runs the trainn method and writes the network weights to a file incrementally
         
-    def run(self, saver,sess, MODELSAVEPATH):
+        saver         : Tensorflow saver object, for writing the weights to file
+        sess          : Reference to the tensorflow session
+        modelSavePath : Path for the model to be saved to
+        """
+
         while(not self.killed):
             self.train()
             self.numUpdated += 1
             if(self.numUpdated%20000 == 0):
-                saver.save(sess, MODELSAVEPATH)
-                print("SAVED!")
+                saver.save(sess, modelSavePath)
+                print("Model weights have been saved")
         
     def train(self):
+        """
+        -Runs the training operation for the primary network
+        """
+
         if(self.net.killAll):
             self._kill()
 

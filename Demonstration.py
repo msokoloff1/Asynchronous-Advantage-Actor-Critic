@@ -1,7 +1,5 @@
 from Game import Game
 
-
-
 class Demonstrator():
     def __init__(self,model, gameType, imageDims, numFrames):
         self.game = Game(gameType, imageDims, numFrames, monitor = True)
