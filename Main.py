@@ -27,6 +27,21 @@ imageDims = 84
 numFrames = 4
 savePath = "savedModels/" + args.game + ".ckpt"
 
+
+def loadWeights(path, sess, saver,train = True):
+    try:
+        saver.restore(sess, path)
+        print("Successfully Restored Model!!"
+    except:
+	if(train):
+            sess.run(tf.global_variables_initializer())
+	    print("No model available for restoration")
+        else:
+	    print("No model found.. exiting")
+            exit(0)
+	      
+	      
+	      
 def train(learningRate, decay,  momentum = 0.0, epsilon = 0.1, gamma = 0.99, numLearners = 1, numPredictors = 1, numPlayers = 20):
     sess = tf.Session()
     trainingQueue = Queue(maxsize = 250)
@@ -36,14 +51,7 @@ def train(learningRate, decay,  momentum = 0.0, epsilon = 0.1, gamma = 0.99, num
     predictors = [Predictor(players, PrimaryNet) for _ in range(numPredictors)]
 
     saver = tf.train.Saver()
-    try:
-        saver.restore(sess, savePath)
-        print("Successfully Restored Model!!")
-    except:
-        sess.run(tf.global_variables_initializer())
-        print("No model available for restoration")
-    
-
+    loadWeights(savePath, sess, saver,train = True)
     l = Learner(trainingQueue, PrimaryNet, actionSpace)    
     for player in players:
         player.start()
@@ -57,13 +65,7 @@ def test():
     with tf.Session() as sess:
         PrimaryNet = Network(actionSpace, log,None,None,None,None,sess,imageDims,numFrames)
         saver = tf.train.Saver()
-        try:
-            saver.restore(sess, MODELSAVEPATH)
-            print("Successfully Restored Model!!")
-        except:
-            print("No model found.. exiting")
-            exit(0)
-            
+        loadWeights(savePath, sess, saver,train = False)   
         player = Demonstrator(PrimaryNet, gameType, 84, 4)
         player.play(10)
 
