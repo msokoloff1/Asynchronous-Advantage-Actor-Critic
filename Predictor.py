@@ -4,16 +4,27 @@ import numpy as np
 class Predictor(Thread):
     def __init__(self, agents, primaryNetwork):
         super().__init__()
+        """
+        agents         : A list of all agents that are training
+        primaryNetwork : The network used for making predictions
+        """
+
         self.setDaemon(True)
         self.primaryNetwork = primaryNetwork
         self.agents = agents
         self.killed = False
         
     def run(self):
+        """
+        - Controls when to stop the prediction process
+        """
         while(not self.killed):
             self._predict()
             
     def _predict(self):
+        """
+        -Aggregates all observations from all agents to perform batch predictions
+        """
             if(self.primaryNetwork.curIter > 100000000):
                 for agent in self.agent:
                     agent.kill()
@@ -43,4 +54,7 @@ class Predictor(Thread):
 
 
     def _kill(self):
+        """
+        - Stops the prediction process
+        """
         self.killed = True
