@@ -192,7 +192,18 @@ class Network():
         fc = tf.matmul(input, weights)
         return activation(fc + bias)
         
-        
+    def gatedActivation(self, input):
+	#Since this is an activation function, the input is a convolutional layer
+        inputFilters = int(input.get_shape())[-1]
+	conv = self._convLayer(input, 4,inputFilters*2,1,"gated",activation = lambda x: x):
+        convS1, convS2 = tf.split(conv, num_or_size_splits=2, axis=-1)
+        tan = tf.nn.tanh(convS1)
+        sig = tf.nn.sigmoid(convS2)
+        multiplied = tf.mul([tan,sig], axis =-1)
+        finalConv = self._convLayer(multiplied, 1, inputFilters, "gatedOneByOne", activation = tf.nn.relu)
+        residualSum = finalConv + input #NEED TO RESHAPE... getting on plane. finish later..
+	return residualSum
+  
     def train(self, states, rewards, actions):
         """
         -Runs the training operation
