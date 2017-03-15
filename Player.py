@@ -35,6 +35,7 @@ class Player(Process):
         self.trainingQueue = trainingQueue
         self.currentReward = 0.0
         self.epsilon = 1.0
+        self.maxReward = 1.0
         
 
     def run(self):
@@ -67,6 +68,14 @@ class Player(Process):
             actionProbs, value = self.result.get()
             action = np.random.choice(self.game.numActions, p=actionProbs)
             curState,prevState,  reward, terminal, info = self.game.step(action)
+            self.maxReward = max(reward, self.maxReward)
+
+            if(self.maxReward > 1):
+                reward = reward / self.maxReward
+
+            if(terminal):
+                reward = -1
+            
             
             memories['rewards'].append(reward)
             memories['prevStates'].append(prevState.reshape(1,84,84,4))
